@@ -23,6 +23,30 @@ pub fn create_terminal() -> Result<Terminal<CrosstermBackend<std::io::Stdout>>, 
     Ok(Terminal::new(backend)?)
 }
 
+pub fn step<F: Fn(crossterm::event::Event)>(sleep_time: Option<u64>, callback: F) {
+    let event = match sleep_time {
+        Some(time) => {
+            if crossterm::event::poll(std::time::Duration::from_millis(time))
+                .unwrap_or_else(|_| false)
+            {
+                Some(crossterm::event::read().unwrap())
+            } else {
+                None
+            }
+        }
+        None => match crossterm::event::read() {
+            Ok(event) => Some(event),
+            // TODO: todo!("figure out how to handle this")
+            Err(_) => None,
+        },
+    };
+
+    match event {
+        None => {}
+        Some(event) => callback(event),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     mod draw {
@@ -70,6 +94,10 @@ mod tests {
     }
 
     mod terminal {
-        // how do i even test this? can i mock all this?
+        // TODO: figure out how to test this
+    }
+
+    mod step {
+        // TODO: figure out how to test this
     }
 }

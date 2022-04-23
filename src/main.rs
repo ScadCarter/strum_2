@@ -17,7 +17,19 @@ impl lib::types::Context for Context {
 }
 
 fn main() {
-    let mut ctx = Context::new(Some(lib::create_terminal().unwrap()));
+    let mut ctx = Box::new(Context::new(Some(lib::create_terminal().unwrap())));
 
-    lib::draw::<Context>(&mut ctx, vec![]);
+    loop {
+        let mut c = &mut ctx;
+
+        lib::draw::<Context>(&mut c, vec![]);
+
+        lib::step(None, |event| match event {
+            crossterm::event::Event::Key(_event) => {}
+            crossterm::event::Event::Mouse(_) => {}
+            crossterm::event::Event::Resize(width, height) => {
+                println!("New size {}x{}", width, height);
+            }
+        });
+    }
 }
